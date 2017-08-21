@@ -4,10 +4,14 @@
 package main
 
 import "fmt"
+import "math/rand"
+import "time"
 
 //Neuron struct which acts as a node in the network
 type Neuron struct {
-	//Fill in with stuff
+	outputVal    float64   //Outgoing signal value
+	outgoWeights []float64 //Outgoing weight values
+	outgoDeltas  []float64 //Change in outgoing weight values
 }
 
 //Network struct which holds the neurons and other data
@@ -22,8 +26,10 @@ func main() {
 	fmt.Println("We're making a neural network!")
 
 	//Initialize the hard coded data
-	data := initData()
-	fmt.Println(data)
+	data := loadData()
+	trainData, testData := prepData(data)
+	fmt.Println(trainData, "\n")
+	fmt.Println(testData)
 
 	//Initialize the network
 	var myNetwork Network
@@ -31,16 +37,72 @@ func main() {
 	fmt.Println(myNetwork)
 }
 
+//****** Network functions ******//
+
 //initNetwork initializes and populates the network with neurons
 // whose weights are set randomly
 func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
+	//Allocate data for neurons
+	// + 1 for the bias neurons
 	net.inputLayer = make([]Neuron, numInputs+1)
 	net.hiddenLayer = make([]Neuron, numHidden+1)
 	net.outputLayer = make([]Neuron, numOutput+1)
+
+	//Initialize input layer
+	for i := range net.inputLayer {
+		net.inputLayer[i].outgoWeights = make([]float64, numHidden+1)
+		//Set each weight to a random number in [0.001, 0.01]
+		for j := range net.inputLayer[i].outgoWeights {
+			net.inputLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
+		}
+		//Declare array for change in weights
+		net.inputLayer[i].outgoDeltas = make([]float64, numHidden+1)
+	}
+
+	//Initialize hidden layer
+	for i := range net.hiddenLayer {
+		net.hiddenLayer[i].outgoWeights = make([]float64, numOutput+1)
+		//Set each weight to a random number in [0.001, 0.01]
+		for j := range net.hiddenLayer[i].outgoWeights {
+			net.hiddenLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
+		}
+		//Declare array for change in weights
+		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
+	}
+
+	//Output layer need not be initialized in the same way because it has
+	// no outgoing connections, only output values.
+}
+
+//****** Data functions ******//
+
+//prepData randomly shuffles the array of iris data and splits
+// the data into training and testing data
+func prepData(data [][]float64) (trainData, testData [][]float64) {
+	//Seed rand with current Unix time
+	rand.Seed(time.Now().Unix())
+
+	//Shuffle the array of data using the Fisher shuffle algorithm
+	for i, j := len(data)-1, 0; i > 0; i-- {
+		//Radom index from remaining elements
+		j = rand.Intn(i)
+
+		//Swap random element with elements from the end of the array
+		swap := data[i]
+		data[i] = data[j]
+		data[j] = swap
+	}
+	fmt.Println(data)
+
+	//Use 80% of the data for training and 20% for testing
+	trainSize := int(float64(len(data)) * 0.8)
+	trainData = data[:trainSize]
+	testData = data[trainSize:]
+	return trainData, testData
 }
 
 //initData returns a [][]float64 containing the hard coded iris data
-func initData() [][]float64 {
+func loadData() [][]float64 {
 	var allData [][]float64
 
 	// sepal length, width, petal length, width
