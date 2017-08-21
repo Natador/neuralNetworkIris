@@ -1,5 +1,5 @@
 # neuralNetworkIris
-A neural network which classifies the famous Iris Data Set and uses backpropagation to learn.
+A neural network which classifies the famous [iris dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set) and uses backpropagation to train the network.
 
 ## Knowledge Resources
 
