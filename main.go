@@ -31,6 +31,14 @@ func main() {
 	fmt.Println(myNetwork)
 }
 
+//initNetwork initializes and populates the network with neurons
+// whose weights are set randomly
+func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
+	net.inputLayer = make([]Neuron, numInputs+1)
+	net.hiddenLayer = make([]Neuron, numHidden+1)
+	net.outputLayer = make([]Neuron, numOutput+1)
+}
+
 //initData returns a [][]float64 containing the hard coded iris data
 func initData() [][]float64 {
 	var allData [][]float64
@@ -206,12 +214,4 @@ func initData() [][]float64 {
 	allData = append(allData, []float64{5.9, 3.0, 5.1, 1.8, 1, 0, 0})
 
 	return allData
-}
-
-//initNetwork initializes and populates the network with neurons
-// whose weights are set randomly
-func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
-	net.inputLayer = make([]Neuron, numInputs+1)
-	net.hiddenLayer = make([]Neuron, numHidden+1)
-	net.outputLayer = make([]Neuron, numOutput+1)
 }
