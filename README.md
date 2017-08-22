@@ -3,7 +3,7 @@ A neural network which classifies the famous [iris dataset](https://en.wikipedia
 
 ## Knowledge Resources
 
-Links to resources which were helpful for the construction of the network.
+Links to resources which were helpful for the construction of the network. Additionally, I received help from friends who have already successfully built neural networks. Their help was invaluable for the progress made with the network.
 
 - [Neural Network Training Using Back-Propagation.](https://visualstudiomagazine.com/articles/2013/09/01/neural-network-training-using-back-propagation.aspx) An article discussing a network constructed in C# which classifies the iris data set.
 
