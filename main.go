@@ -137,7 +137,6 @@ func shuffleIndices(length int) []int {
 
 //prepData splits the training data into 80% for training and 20% for testing
 func prepData(data [][]float64) (trainData, testData [][]float64) {
-	//Use 80% of the data for training and 20% for testing
 	trainSize := int(float64(len(data)) * 0.8)
 	trainData = data[:trainSize]
 	testData = data[trainSize:]
