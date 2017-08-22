@@ -9,7 +9,7 @@ import "time"
 
 //Neuron struct which acts as a node in the network
 type Neuron struct {
-	outputVal    float64   //Outgoing signal value
+	outgoVal     float64   //Outgoing signal value
 	outgoWeights []float64 //Outgoing weight values
 	outgoDeltas  []float64 //Change in outgoing weight values
 }
@@ -28,13 +28,22 @@ func main() {
 	//Initialize the hard coded data
 	data := loadData()
 	trainData, testData := prepData(data)
-	fmt.Println(trainData, "\n")
-	fmt.Println(testData)
+	//fmt.Println(trainData, "\n")
+	//fmt.Println(testData)
 
 	//Initialize the network
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
-	fmt.Println(myNetwork)
+	//fmt.Println(myNetwork)
+
+	/*
+		learningRate := 0.01
+		momentum := 0.05
+		maxEpochs := 10000
+		myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
+		testAccuracy := myNetwork.Test(testData)
+		fmt.Println("Test accuracy:", testAccuracy)
+	*/
 }
 
 //****** Network functions ******//
@@ -42,7 +51,7 @@ func main() {
 //initNetwork initializes and populates the network with neurons
 // whose weights are set randomly
 func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
-	//Allocate data for neurons
+	//Allocate memory for neurons
 	// + 1 for the bias neurons
 	net.inputLayer = make([]Neuron, numInputs+1)
 	net.hiddenLayer = make([]Neuron, numHidden+1)
@@ -70,30 +79,50 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
 	}
 
-	//Output layer need not be initialized in the same way because it has
-	// no outgoing connections, only output values.
+	//Output layer has no outgoing weights, so they are set to nil
+	for i := range net.outputLayer {
+		net.outputLayer[i].outgoWeights = nil
+		net.outputLayer[i].outgoDeltas = nil
+	}
+}
+
+//train trains the network using the input data
+func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) float64 {
+	//Variables to hold input data and target data
+
+	//Main training loop
+	//	feedFoward computes outputs
+	//	backProp updates the weights
 }
 
 //****** Data functions ******//
 
-//prepData randomly shuffles the array of iris data and splits
-// the data into training and testing data
-func prepData(data [][]float64) (trainData, testData [][]float64) {
+//shuffleIndices returns an array of shuffled integers which range from 0 to len(arr)
+func shuffleIndices(length int) []int {
+	//Make array and initialize each position's data to the index
+	indices := make([]int, length)
+	for i := range indices {
+		indices[i] = i
+	}
+
 	//Seed rand with current Unix time
 	rand.Seed(time.Now().Unix())
 
-	//Shuffle the array of data using the Fisher shuffle algorithm
-	for i, j := len(data)-1, 0; i > 0; i-- {
-		//Radom index from remaining elements
+	//Shuffle the array using the Fisher shuffle algorithm
+	for i, j := length-1, 0; i > 0; i-- {
+		//random integer in interval [0, i]
 		j = rand.Intn(i)
 
-		//Swap random element with elements from the end of the array
-		swap := data[i]
-		data[i] = data[j]
-		data[j] = swap
+		swap := indices[i]
+		indices[i] = indices[j]
+		indices[j] = swap
 	}
-	fmt.Println(data)
 
+	return indices
+}
+
+//prepData splits the training data into 80% for training and 20% for testing
+func prepData(data [][]float64) (trainData, testData [][]float64) {
 	//Use 80% of the data for training and 20% for testing
 	trainSize := int(float64(len(data)) * 0.8)
 	trainData = data[:trainSize]
