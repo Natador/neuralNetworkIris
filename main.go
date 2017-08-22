@@ -91,8 +91,22 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 	//Variables to hold input data and target data
 
 	//Main training loop
-	//	feedFoward computes outputs
-	//	backProp updates the weights
+	//	feedFoward(inputData) computes outputs
+	//	backProp(targetData) updates the weights
+}
+
+//feedForward computes the output for each neuron in each layer
+func (net *Network) feedForward(inputs []float64) {
+	//Set outgoing values of input layer to the input data
+
+	//Compute hidden values
+
+	//Compute output values
+
+}
+
+func (net *Network) backProp(targetVals []float64) {
+	//Implement algorithm to update the weights and deltas in each neuron
 }
 
 //****** Data functions ******//
