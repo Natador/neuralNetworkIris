@@ -34,7 +34,7 @@ func main() {
 	//Initialize the network
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
-	myNetwork.Train(trainData, 5, 2.4, 2.4)
+	myNetwork.Train(trainData, 0, 0.0, 0.0)
 
 	/*
 		learningRate := 0.01
@@ -116,7 +116,7 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 		//Compute the output by feeding-forward the input data
 		net.feedForward(inputData)
 		//for j := 0; j < len(net.outputLayer) - 1; j++ {
-		//fmt.Println(net.outputLayer[j])
+		//fmt.Println(net.outputLayer[j].outgoVal)
 		//}
 		//net.backProp(targetData, learnRate, momentum)
 	}
@@ -135,14 +135,16 @@ func (net *Network) feedForward(inputs []float64) {
 			net.inputLayer[i].outgoVal = inputs[i]
 		}
 
-		//Scratch array to compute the sums of the input neurons to be fed to the hidden neurons after activation
+		//Scratch array to compute the inputs to the hidden layer
 		//	Length is -1 to account of the hidden bias neuron, which needs no input
 		hiddenInputs := make([]float64, len(net.hiddenLayer)-1)
 
 		//Compute the weighted sum of input values
 		for i := range hiddenInputs {
 			for j := range net.inputLayer {
-				hiddenInputs[i] += net.inputLayer[j].outgoVal
+				//Weights accessed by i becuase i determines which connection is made to the next layer
+				//	Includes the weighted sum of the bias neuron's output
+				hiddenInputs[i] += net.inputLayer[j].outgoVal * net.inputLayer[j].outgoWeights[i]
 			}
 
 			//Apply the activation function to the weighted sum
@@ -151,6 +153,15 @@ func (net *Network) feedForward(inputs []float64) {
 		fmt.Println(hiddenInputs)
 
 		//Compute hidden values
+
+		//Compute the weighted sum of hidde layer outputs and apply activation function.
+		//	These are directly stored in the outgoVal of the output layer
+		for i := range net.outputLayer {
+			var sum float64 = 0.0
+			for j := range net.hiddenLayer {
+				sum += net.hiddenLayer[j]
+			}
+		}
 
 	}
 
