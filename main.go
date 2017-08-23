@@ -4,6 +4,7 @@
 package main
 
 import "fmt"
+import "math"
 import "math/rand"
 import "time"
 
@@ -27,14 +28,13 @@ func main() {
 
 	//Initialize the hard coded data
 	data := loadData()
-	trainData, testData := prepData(data)
-	//fmt.Println(trainData, "\n")
-	//fmt.Println(testData)
+	//trainData, testData := prepData(data)
+	trainData, _ := prepData(data)
 
 	//Initialize the network
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
-	//fmt.Println(myNetwork)
+	myNetwork.Train(trainData, 5, 2.4, 2.4)
 
 	/*
 		learningRate := 0.01
@@ -52,16 +52,20 @@ func main() {
 // whose weights are set randomly
 func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 	//Allocate memory for neurons
-	// + 1 for the bias neurons
+	// + 1 for the bias neurons except for the output
 	net.inputLayer = make([]Neuron, numInputs+1)
 	net.hiddenLayer = make([]Neuron, numHidden+1)
-	net.outputLayer = make([]Neuron, numOutput+1)
+	net.outputLayer = make([]Neuron, numOutput)
 
 	//Initialize input layer
 	for i := range net.inputLayer {
 		net.inputLayer[i].outgoWeights = make([]float64, numHidden+1)
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.inputLayer[i].outgoWeights {
+			//If the neuron is a bias neuron, set its output to 1.0
+			if j == len(net.inputLayer[i].outgoWeights) {
+				net.inputLayer[i].outgoVal = 1.0
+			}
 			net.inputLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
 		}
 		//Declare array for change in weights
@@ -73,6 +77,10 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		net.hiddenLayer[i].outgoWeights = make([]float64, numOutput+1)
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.hiddenLayer[i].outgoWeights {
+			//If the neuron is a bias neuron, set its output to 1.0
+			if j == len(net.hiddenLayer[i].outgoWeights) {
+				net.hiddenLayer[i].outgoVal = 1.0
+			}
 			net.hiddenLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
 		}
 		//Declare array for change in weights
@@ -87,17 +95,64 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 }
 
 //train trains the network using the input data
-func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) float64 {
+func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) {
 	//Variables to hold input data and target data
 
 	//Main training loop
-	//	feedFoward(inputData) computes outputs
-	//	backProp(targetData) updates the weights
+	//	error = net.calculateError()
+	//	if error > errorRate {
+	//		break
+	//	}
+
+	//Get an array of shuffled indicesto access the training data in a random order
+	indices := shuffleIndices(len(trainData))
+
+	//Loop through the data randomly and compute the feedForward output, then print the output
+	for _, i := range indices {
+		//inputData to hold the measurements, targetData to hold the classification
+		inputData := trainData[i][:4]
+		//targetData := trainData[i][4:]
+
+		//Compute the output by feeding-forward the input data
+		net.feedForward(inputData)
+		//for j := 0; j < len(net.outputLayer) - 1; j++ {
+		//fmt.Println(net.outputLayer[j])
+		//}
+		//net.backProp(targetData, learnRate, momentum)
+	}
+
+	//	backProp(targetData, learnRate, momentum) updates the weights
 }
 
 //feedForward computes the output for each neuron in each layer
 func (net *Network) feedForward(inputs []float64) {
-	//Set outgoing values of input layer to the input data
+	//Error checking the dimension of the input vector and the number of input neurons
+	if len(inputs) != len(net.inputLayer)-1 {
+		fmt.Println("Error with input vector dimensions!")
+	} else {
+		//Set outgoing values of input layer to the input data, excluding the bias neuron
+		for i := 0; i < len(net.inputLayer)-1; i++ {
+			net.inputLayer[i].outgoVal = inputs[i]
+		}
+
+		//Scratch array to compute the sums of the input neurons to be fed to the hidden neurons after activation
+		//	Length is -1 to account of the hidden bias neuron, which needs no input
+		hiddenInputs := make([]float64, len(net.hiddenLayer)-1)
+
+		//Compute the weighted sum of input values
+		for i := range hiddenInputs {
+			for j := range net.inputLayer {
+				hiddenInputs[i] += net.inputLayer[j].outgoVal
+			}
+
+			//Apply the activation function to the weighted sum
+			hiddenInputs[i] = math.Tanh(hiddenInputs[i])
+		}
+		fmt.Println(hiddenInputs)
+
+		//Compute hidden values
+
+	}
 
 	//Compute hidden values
 
