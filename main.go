@@ -135,40 +135,37 @@ func (net *Network) feedForward(inputs []float64) {
 			net.inputLayer[i].outgoVal = inputs[i]
 		}
 
-		//Scratch array to compute the inputs to the hidden layer
-		//	Length is -1 to account of the hidden bias neuron, which needs no input
-		hiddenInputs := make([]float64, len(net.hiddenLayer)-1)
+		//compute hidden layer values
 
-		//Compute the weighted sum of input values
-		for i := range hiddenInputs {
+		//Compute the weighted sum of input values (excludes bias neuron)
+		for i := 0; i < len(net.hiddenLayer)-1; i++ {
 			for j := range net.inputLayer {
 				//Weights accessed by i becuase i determines which connection is made to the next layer
 				//	Includes the weighted sum of the bias neuron's output
-				hiddenInputs[i] += net.inputLayer[j].outgoVal * net.inputLayer[j].outgoWeights[i]
+				net.hiddenLayer[i].outgoVal += net.inputLayer[j].outgoVal * net.inputLayer[j].outgoWeights[i]
 			}
 
 			//Apply the activation function to the weighted sum
-			hiddenInputs[i] = math.Tanh(hiddenInputs[i])
+			net.hiddenLayer[i].outgoVal = math.Tanh(net.hiddenLayer[i].outgoVal)
 		}
-		fmt.Println(hiddenInputs)
+		fmt.Println()
 
-		//Compute hidden values
+		//Compute output values
 
-		//Compute the weighted sum of hidde layer outputs and apply activation function.
+		//Compute the weighted sum of hidden layer outputs and apply activation function.
 		//	These are directly stored in the outgoVal of the output layer
+		//	No bias neurons in the output layer, so we can loop directly through it
 		for i := range net.outputLayer {
-			var sum float64 = 0.0
 			for j := range net.hiddenLayer {
-				sum += net.hiddenLayer[j]
+				net.outputLayer[i].outgoVal += net.hiddenLayer[j].outgoVal * net.hiddenLayer[j].outgoWeights[i]
 			}
+
+			//Apply the activation function to the weighted sum
+			net.outputLayer[i].outgoVal = math.Tanh(net.outputLayer[i].outgoVal)
+			fmt.Println(net.outputLayer[i].outgoVal)
 		}
 
 	}
-
-	//Compute hidden values
-
-	//Compute output values
-
 }
 
 func (net *Network) backProp(targetVals []float64) {
