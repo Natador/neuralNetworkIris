@@ -139,6 +139,7 @@ func (net *Network) feedForward(inputs []float64) {
 
 		//Compute the weighted sum of input values (excludes bias neuron)
 		for i := 0; i < len(net.hiddenLayer)-1; i++ {
+			//var sum float64 = 0
 			for j := range net.inputLayer {
 				//Weights accessed by i becuase i determines which connection is made to the next layer
 				//	Includes the weighted sum of the bias neuron's output
@@ -146,7 +147,7 @@ func (net *Network) feedForward(inputs []float64) {
 			}
 
 			//Apply the activation function to the weighted sum
-			net.hiddenLayer[i].outgoVal = math.Tanh(net.hiddenLayer[i].outgoVal)
+			net.hiddenLayer[i].outgoVal = activationFunction(net.hiddenLayer[i].outgoVal)
 		}
 		fmt.Println()
 
@@ -156,20 +157,39 @@ func (net *Network) feedForward(inputs []float64) {
 		//	These are directly stored in the outgoVal of the output layer
 		//	No bias neurons in the output layer, so we can loop directly through it
 		for i := range net.outputLayer {
+			var sum float64 = 0
 			for j := range net.hiddenLayer {
-				net.outputLayer[i].outgoVal += net.hiddenLayer[j].outgoVal * net.hiddenLayer[j].outgoWeights[i]
+				sum += net.hiddenLayer[j].outgoVal * net.hiddenLayer[j].outgoWeights[i]
 			}
 
 			//Apply the activation function to the weighted sum
-			net.outputLayer[i].outgoVal = math.Tanh(net.outputLayer[i].outgoVal)
+			net.outputLayer[i].outgoVal = activationFunction(sum)
 			fmt.Println(net.outputLayer[i].outgoVal)
 		}
 
 	}
 }
 
-func (net *Network) backProp(targetVals []float64) {
-	//Implement algorithm to update the weights and deltas in each neuron
+func (net *Network) backProp(targetData []float64, learnRate, momentum float64) {
+	//Calculate output layer gradients
+
+	//Calculate hidden layer gradients
+
+	//Update weights for all connections
+
+	//Update weight deltas for all connections
+}
+
+//Activation function is the function used to activate the neurons, in this case tanh
+//	Wrapper included for flexibility and optimization
+func activationFunction(num float64) float64 {
+	return math.Tanh(num)
+}
+
+//Derivative of the activation function used in backpropagation
+func activationDerivatiev(num float64) float64 {
+	j := math.Tanh(num)
+	return 1.0 - j*j
 }
 
 //****** Data functions ******//
