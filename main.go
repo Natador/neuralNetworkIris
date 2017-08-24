@@ -24,6 +24,7 @@ type Network struct {
 }
 
 func main() {
+	rand.Seed(time.Now().Unix())
 	fmt.Println("We're making a neural network!")
 
 	//Initialize the hard coded data
@@ -60,6 +61,7 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 	//Initialize input layer
 	for i := range net.inputLayer {
 		net.inputLayer[i].outgoWeights = make([]float64, numHidden+1)
+
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.inputLayer[i].outgoWeights {
 			//If the neuron is a bias neuron, set its output to 1.0
@@ -68,13 +70,18 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 			}
 			net.inputLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
 		}
+
 		//Declare array for change in weights
 		net.inputLayer[i].outgoDeltas = make([]float64, numHidden+1)
+
+		//Set the input layer's outgoVal to zero
+		net.inputLayer[i].outgoVal = 0
 	}
 
 	//Initialize hidden layer
 	for i := range net.hiddenLayer {
 		net.hiddenLayer[i].outgoWeights = make([]float64, numOutput+1)
+
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.hiddenLayer[i].outgoWeights {
 			//If the neuron is a bias neuron, set its output to 1.0
@@ -85,10 +92,14 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		}
 		//Declare array for change in weights
 		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
+
+		//Set outputs to zero (default)
+		net.hiddenLayer[i].outgoVal = 0
 	}
 
 	//Output layer has no outgoing weights, so they are set to nil
 	for i := range net.outputLayer {
+		net.outputLayer[i].outgoVal = 0
 		net.outputLayer[i].outgoWeights = nil
 		net.outputLayer[i].outgoDeltas = nil
 	}
@@ -115,9 +126,11 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 
 		//Compute the output by feeding-forward the input data
 		net.feedForward(inputData)
-		//for j := 0; j < len(net.outputLayer) - 1; j++ {
-		//fmt.Println(net.outputLayer[j].outgoVal)
-		//}
+		fmt.Println()
+		for j := range net.outputLayer {
+			fmt.Println(net.outputLayer[j].outgoVal)
+		}
+
 		//net.backProp(targetData, learnRate, momentum)
 	}
 
@@ -139,22 +152,20 @@ func (net *Network) feedForward(inputs []float64) {
 
 		//Compute the weighted sum of input values (excludes bias neuron)
 		for i := 0; i < len(net.hiddenLayer)-1; i++ {
-			//var sum float64 = 0
+			var sum float64 = 0
 			for j := range net.inputLayer {
 				//Weights accessed by i becuase i determines which connection is made to the next layer
 				//	Includes the weighted sum of the bias neuron's output
-				net.hiddenLayer[i].outgoVal += net.inputLayer[j].outgoVal * net.inputLayer[j].outgoWeights[i]
+				sum += net.inputLayer[j].outgoVal * net.inputLayer[j].outgoWeights[i]
 			}
 
 			//Apply the activation function to the weighted sum
-			net.hiddenLayer[i].outgoVal = activationFunction(net.hiddenLayer[i].outgoVal)
+			net.hiddenLayer[i].outgoVal = activationFunction(sum)
 		}
-		fmt.Println()
 
 		//Compute output values
 
 		//Compute the weighted sum of hidden layer outputs and apply activation function.
-		//	These are directly stored in the outgoVal of the output layer
 		//	No bias neurons in the output layer, so we can loop directly through it
 		for i := range net.outputLayer {
 			var sum float64 = 0
@@ -164,9 +175,7 @@ func (net *Network) feedForward(inputs []float64) {
 
 			//Apply the activation function to the weighted sum
 			net.outputLayer[i].outgoVal = activationFunction(sum)
-			fmt.Println(net.outputLayer[i].outgoVal)
 		}
-
 	}
 }
 
@@ -180,8 +189,7 @@ func (net *Network) backProp(targetData []float64, learnRate, momentum float64) 
 	//Update weight deltas for all connections
 }
 
-//Activation function is the function used to activate the neurons, in this case tanh
-//	Wrapper included for flexibility and optimization
+//Wrapper function for changes or optimization
 func activationFunction(num float64) float64 {
 	return math.Tanh(num)
 }
@@ -201,9 +209,6 @@ func shuffleIndices(length int) []int {
 	for i := range indices {
 		indices[i] = i
 	}
-
-	//Seed rand with current Unix time
-	rand.Seed(time.Now().Unix())
 
 	//Shuffle the array using the Fisher shuffle algorithm
 	for i, j := length-1, 0; i > 0; i-- {
