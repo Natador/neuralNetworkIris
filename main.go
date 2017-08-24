@@ -35,16 +35,13 @@ func main() {
 	//Initialize the network
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
-	myNetwork.Train(trainData, 0, 0.0, 0.0)
 
-	/*
-		learningRate := 0.01
-		momentum := 0.05
-		maxEpochs := 10000
-		myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
-		testAccuracy := myNetwork.Test(testData)
-		fmt.Println("Test accuracy:", testAccuracy)
-	*/
+	learningRate := 0.01
+	momentum := 0.05
+	maxEpochs := 1
+	myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
+	//testAccuracy := myNetwork.Test(testData)
+	//fmt.Println("Test accuracy:", testAccuracy)
 }
 
 //****** Network functions ******//
@@ -93,7 +90,7 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		//Declare array for change in weights
 		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
 
-		//Set outputs to zero (default)
+		//Set hidden layer's outputs to zero
 		net.hiddenLayer[i].outgoVal = 0
 	}
 
@@ -109,29 +106,32 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) {
 	//Variables to hold input data and target data
 
+	indices := initIndices(len(trainData))
 	//Main training loop
-	//	error = net.calculateError()
-	//	if error > errorRate {
-	//		break
-	//	}
+	for epoch := 0; epoch < maxEpochs; epoch++ {
+		//	error = net.calculateError()
+		//	if error > errorRate {
+		//		break
+		//	}
 
-	//Get an array of shuffled indicesto access the training data in a random order
-	indices := shuffleIndices(len(trainData))
+		//Shuffle the array of indices
+		shuffleIndices(indices)
 
-	//Loop through the data randomly and compute the feedForward output, then print the output
-	for _, i := range indices {
-		//inputData to hold the measurements, targetData to hold the classification
-		inputData := trainData[i][:4]
-		//targetData := trainData[i][4:]
+		//Loop through the data randomly and compute the feedForward output, then print the output
+		for _, i := range indices {
+			//inputData to hold the measurements, targetData to hold the classification
+			inputData := trainData[i][:4]
+			//targetData := trainData[i][4:]
 
-		//Compute the output by feeding-forward the input data
-		net.feedForward(inputData)
-		fmt.Println()
-		for j := range net.outputLayer {
-			fmt.Println(net.outputLayer[j].outgoVal)
+			//Compute the output by feeding-forward the input data
+			net.feedForward(inputData)
+			fmt.Println()
+			for j := range net.outputLayer {
+				fmt.Println(net.outputLayer[j].outgoVal)
+			}
+
+			//net.backProp(targetData, learnRate, momentum)
 		}
-
-		//net.backProp(targetData, learnRate, momentum)
 	}
 
 	//	backProp(targetData, learnRate, momentum) updates the weights
@@ -202,16 +202,20 @@ func activationDerivatiev(num float64) float64 {
 
 //****** Data functions ******//
 
-//shuffleIndices returns an array of shuffled integers which range from 0 to len(arr)
-func shuffleIndices(length int) []int {
-	//Make array and initialize each position's data to the index
+//initIndices creates a slice of the given length with values stored as their indices
+func initIndices(length int) []int {
 	indices := make([]int, length)
 	for i := range indices {
 		indices[i] = i
 	}
 
+	return indices
+}
+
+//shuffleIndices shuffles a given array of indices
+func shuffleIndices(indices []int) []int {
 	//Shuffle the array using the Fisher shuffle algorithm
-	for i, j := length-1, 0; i > 0; i-- {
+	for i, j := len(indices)-1, 0; i > 0; i-- {
 		//random integer in interval [0, i]
 		j = rand.Intn(i)
 
