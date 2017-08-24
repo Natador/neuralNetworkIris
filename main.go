@@ -1,5 +1,5 @@
 //Author: Nathaniel Cantwell
-//Neural network which classifies the iris data set
+//Neural network which classifies the famous iris data set
 
 package main
 
