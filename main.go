@@ -24,7 +24,6 @@ type Network struct {
 }
 
 func main() {
-	rand.Seed(time.Now().Unix())
 	fmt.Println("We're making a neural network!")
 
 	//Initialize the hard coded data
@@ -33,6 +32,7 @@ func main() {
 	trainData, _ := prepData(data)
 
 	//Initialize the network
+	rand.Seed(time.Now().Unix())
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
 
@@ -104,13 +104,12 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 
 //train trains the network using the input data
 func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) {
-	//Variables to hold input data and target data
-
+	//Indices for randomly looping through the training data
 	indices := initIndices(len(trainData))
+
 	//Main training loop
 	for epoch := 0; epoch < maxEpochs; epoch++ {
-		//	error = net.calculateError()
-		//	if error > errorRate {
+		//	if net.calculateError() > 0.005 {
 		//		break
 		//	}
 
