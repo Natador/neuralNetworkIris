@@ -61,18 +61,18 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.inputLayer[i].outgoWeights {
-			//If the neuron is a bias neuron, set its output to 1.0
-			if j == len(net.inputLayer[i].outgoWeights) {
-				net.inputLayer[i].outgoVal = 1.0
-			}
 			net.inputLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
 		}
 
 		//Declare array for change in weights
 		net.inputLayer[i].outgoDeltas = make([]float64, numHidden+1)
 
-		//Set the input layer's outgoVal to zero
-		net.inputLayer[i].outgoVal = 0
+		//Set bias neuron's output to 1.0, and all other outputs to zero
+		if i == len(net.inputLayer)-1 {
+			net.inputLayer[i].outgoVal = 1.0
+		} else {
+			net.inputLayer[i].outgoVal = 0.0
+		}
 	}
 
 	//Initialize hidden layer
@@ -81,17 +81,17 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 
 		//Set each weight to a random number in [0.001, 0.01]
 		for j := range net.hiddenLayer[i].outgoWeights {
-			//If the neuron is a bias neuron, set its output to 1.0
-			if j == len(net.hiddenLayer[i].outgoWeights) {
-				net.hiddenLayer[i].outgoVal = 1.0
-			}
 			net.hiddenLayer[i].outgoWeights[j] = rand.Float64()*(0.01-0.001) + 0.001
 		}
 		//Declare array for change in weights
 		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
 
-		//Set hidden layer's outputs to zero
-		net.hiddenLayer[i].outgoVal = 0
+		//Set hidden layer's bias neuron output to 1.0. Set all other outputs to zero.
+		if i == len(net.hiddenLayer)-1 {
+			net.hiddenLayer[i].outgoVal = 1.0
+		} else {
+			net.hiddenLayer[i].outgoVal = 0.0
+		}
 	}
 
 	//Output layer has no outgoing weights, so they are set to nil
@@ -124,10 +124,10 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 
 			//Compute the output by feeding-forward the input data
 			net.feedForward(inputData)
-			fmt.Println()
-			for j := range net.outputLayer {
-				fmt.Println(net.outputLayer[j].outgoVal)
-			}
+			//fmt.Println()
+			//for j := range net.outputLayer {
+			//fmt.Println(net.outputLayer[j].outgoVal)
+			//}
 
 			//net.backProp(targetData, learnRate, momentum)
 		}
@@ -179,13 +179,30 @@ func (net *Network) feedForward(inputs []float64) {
 }
 
 func (net *Network) backProp(targetData []float64, learnRate, momentum float64) {
-	//Calculate output layer gradients
+	//Calculate output layer error signal
+	outputErrorSignal := make([]float64, len(net.outputLayer))
+	for i := range net.outputLayer {
+		outputErrorSignal[i] = (targetData[i] - net.outputLayer[i].outgoVal) * activationDerivative(net.outputLayer[i].outgoVal)
+	}
+
+	//Update hidden layer outgoing weights and deltas
+	for i := range net.outputLayer {
+		for j := range net.hiddenLayer {
+			//Calculate the change in weight
+			weightChange := learnRate*outputErrorSignal[i]*net.hiddenLayer[j].outgoVal + momentum*net.hiddenLayer[j].outgoDeltas[i]
+
+			//Apply the change to the hidden weight
+			net.hiddenLayer[j].outgoWeights[i] += weightChange
+
+			//Update the weight delta for each connection
+			net.hiddenLayer[j].outgoDeltas[i] = weightChange
+		}
+	}
 
 	//Calculate hidden layer gradients
+	//hiddenErrorSignal := make([]float64, len(net.hiddenLayer))
 
-	//Update weights for all connections
-
-	//Update weight deltas for all connections
+	//Update outgoing weights and deltas for input neurons
 }
 
 //Wrapper function for changes or optimization
@@ -194,7 +211,7 @@ func activationFunction(num float64) float64 {
 }
 
 //Derivative of the activation function used in backpropagation
-func activationDerivatiev(num float64) float64 {
+func activationDerivative(num float64) float64 {
 	j := math.Tanh(num)
 	return 1.0 - j*j
 }
