@@ -191,18 +191,40 @@ func (net *Network) backProp(targetData []float64, learnRate, momentum float64) 
 			//Calculate the change in weight
 			weightChange := learnRate*outputErrorSignal[i]*net.hiddenLayer[j].outgoVal + momentum*net.hiddenLayer[j].outgoDeltas[i]
 
-			//Apply the change to the hidden weight
+			//Apply the change to the hidden weight. Note +=
 			net.hiddenLayer[j].outgoWeights[i] += weightChange
 
-			//Update the weight delta for each connection
+			//Update the weight delta for each connection. Note =
 			net.hiddenLayer[j].outgoDeltas[i] = weightChange
 		}
 	}
 
 	//Calculate hidden layer gradients
-	//hiddenErrorSignal := make([]float64, len(net.hiddenLayer))
+	hiddenErrorSignal := make([]float64, len(net.hiddenLayer))
+	sumsOfWeights := make([]float64, len(net.hiddenLayer))
+
+	//Compute the error signal for each neuron in the hidden layer
+	for j := range net.hiddenLayer {
+		var weightSum float64 = 0.0
+		for i := range net.outputLayer {
+			weightSum += net.hiddenLayer[j].outgoWeights[i] * outputErrorSignal[i]
+		}
+		hiddenErrorSignal[j] = activationDerivative(net.hiddenLayer[j].outgoVal) * weightSum
+	}
 
 	//Update outgoing weights and deltas for input neurons
+	for j := range net.hiddenLayer {
+		for k := range net.inputLayer {
+			//Calculate the change in weight
+			weightChange := learnRate*hiddenErrorSignal[j]*net.inputLayer[k].outgoVal + momentum*net.inputLayer[k].outgoDeltas[j]
+
+			//Apply the change to the input weight. Note the +=
+			net.inputLayer[k].outgoWeights[j] += weightChange
+
+			//Update the weight delta for each connection. Note =
+			net.inputLayer[k].outgoDeltas[j] = weightChange
+		}
+	}
 }
 
 //Wrapper function for changes or optimization
@@ -211,8 +233,9 @@ func activationFunction(num float64) float64 {
 }
 
 //Derivative of the activation function used in backpropagation
-func activationDerivative(num float64) float64 {
-	j := math.Tanh(num)
+//	Derivative of tanh(x) = 1 - tanh(x)*tanh(x)
+//	We assume the input is tanh(num)
+func activationDerivative(output float64) float64 {
 	return 1.0 - j*j
 }
 
