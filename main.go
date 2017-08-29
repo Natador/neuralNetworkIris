@@ -29,7 +29,7 @@ func main() {
 	//Initialize the hard coded data
 	data := loadData()
 	//trainData, testData := prepData(data)
-	trainData, _ := prepData(data)
+	//trainData, _ := prepData(data)
 
 	//Initialize the network
 	rand.Seed(time.Now().Unix())
@@ -39,9 +39,9 @@ func main() {
 	learningRate := 0.01
 	momentum := 0.05
 	maxEpochs := 1
-	myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
-	//testAccuracy := myNetwork.Test(testData)
-	//fmt.Println("Test accuracy:", testAccuracy)
+	myNetwork.Train(data, maxEpochs, learningRate, momentum)
+	testAccuracy := myNetwork.Test(data)
+	fmt.Println("Test accuracy:", testAccuracy)
 }
 
 //****** Network functions ******//
@@ -109,7 +109,8 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 
 	//Main training loop
 	for epoch := 0; epoch < maxEpochs; epoch++ {
-		//	if net.calculateError() > 0.005 {
+		//	globalError := net.calculateGlobalError(data)
+		//	if globalError > 0.005 {
 		//		break
 		//	}
 
@@ -120,7 +121,7 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 		for _, i := range indices {
 			//inputData to hold the measurements, targetData to hold the classification
 			inputData := trainData[i][:4]
-			//targetData := trainData[i][4:]
+			targetData := trainData[i][4:]
 
 			//Compute the output by feeding-forward the input data
 			net.feedForward(inputData)
@@ -129,11 +130,49 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 			//fmt.Println(net.outputLayer[j].outgoVal)
 			//}
 
-			//net.backProp(targetData, learnRate, momentum)
+			net.backProp(targetData, learnRate, momentum)
+		}
+	}
+}
+
+//Test compares the output from the neural network to the target output in the test data
+func (net *Network) Test(data [][]float64) float64 {
+	var numCorrect int = 0
+
+	//Loop through the dataset
+	for _, datum := range data {
+		//Feed the inputs through the network
+		net.feedForward(datum[:4])
+
+		//Compare the outputs to the actual data
+		if net.isCorrect(datum[4:]) {
+			numCorrect++
+		}
+	}
+	return float64(numCorrect) / float64(len(data))
+}
+
+//isCorrect compares the output of the network to the actual value and returns a boolean
+func (net *Network) isCorrect(targetData []float64) bool {
+	if len(net.outputLayer) != len(targetData) {
+		fmt.Println("Error with targetData length!")
+		return false
+	}
+
+	var maxVal float64 = net.outputLayer[0].outgoVal
+	var maxIndex int = 0
+	for i := range net.outputLayer {
+		if net.outputLayer[i].outgoVal > maxVal {
+			maxVal = net.outputLayer[i].outgoVal
+			maxIndex = i
 		}
 	}
 
-	//	backProp(targetData, learnRate, momentum) updates the weights
+	if targetData[maxIndex] == 1.0 {
+		return true
+	} else {
+		return false
+	}
 }
 
 //feedForward computes the output for each neuron in each layer
@@ -201,7 +240,6 @@ func (net *Network) backProp(targetData []float64, learnRate, momentum float64) 
 
 	//Calculate hidden layer gradients
 	hiddenErrorSignal := make([]float64, len(net.hiddenLayer))
-	sumsOfWeights := make([]float64, len(net.hiddenLayer))
 
 	//Compute the error signal for each neuron in the hidden layer
 	for j := range net.hiddenLayer {
@@ -236,7 +274,7 @@ func activationFunction(num float64) float64 {
 //	Derivative of tanh(x) = 1 - tanh(x)*tanh(x)
 //	We assume the input is tanh(num)
 func activationDerivative(output float64) float64 {
-	return 1.0 - j*j
+	return 1.0 - output*output
 }
 
 //****** Data functions ******//
