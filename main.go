@@ -39,8 +39,10 @@ func main() {
 	momentum := 0.05
 	maxEpochs := 2000
 	myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
+	trainAccuracy := myNetwork.Test(trainData)
 	testAccuracy := myNetwork.Test(testData)
-	fmt.Println("Test accuracy:", testAccuracy)
+	fmt.Printf("\nTraining accuracy: %.2f%%\n", trainAccuracy*100.0)
+	fmt.Printf("Testing accuracy: %.2f%%\n\n", testAccuracy*100.0)
 
 	//myNetwork.feedForward(data[20][:4])
 	//fmt.Println(myNetwork.outputLayer)
