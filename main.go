@@ -25,23 +25,26 @@ type Network struct {
 
 func main() {
 	fmt.Println("We're making a neural network!")
+	rand.Seed(time.Now().Unix())
 
 	//Initialize the hard coded data
 	data := loadData()
-	//trainData, testData := prepData(data)
-	//trainData, _ := prepData(data)
+	trainData, testData := prepData(data)
 
 	//Initialize the network
-	rand.Seed(time.Now().Unix())
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
 
 	learningRate := 0.01
 	momentum := 0.05
-	maxEpochs := 1
-	myNetwork.Train(data, maxEpochs, learningRate, momentum)
-	testAccuracy := myNetwork.Test(data)
+	maxEpochs := 2000
+	myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
+	testAccuracy := myNetwork.Test(testData)
 	fmt.Println("Test accuracy:", testAccuracy)
+
+	//myNetwork.feedForward(data[20][:4])
+	//fmt.Println(myNetwork.outputLayer)
+	//fmt.Println(data[20][4:])
 }
 
 //****** Network functions ******//
@@ -146,6 +149,9 @@ func (net *Network) Test(data [][]float64) float64 {
 
 		//Compare the outputs to the actual data
 		if net.isCorrect(datum[4:]) {
+			//fmt.Println("Correct output:")
+			//fmt.Println(datum[4:])
+			//fmt.Println(net.outputLayer)
 			numCorrect++
 		}
 	}
@@ -162,6 +168,7 @@ func (net *Network) isCorrect(targetData []float64) bool {
 	var maxVal float64 = net.outputLayer[0].outgoVal
 	var maxIndex int = 0
 	for i := range net.outputLayer {
+		//fmt.Println(net.outputLayer[i].outgoVal)
 		if net.outputLayer[i].outgoVal > maxVal {
 			maxVal = net.outputLayer[i].outgoVal
 			maxIndex = i
@@ -267,14 +274,14 @@ func (net *Network) backProp(targetData []float64, learnRate, momentum float64) 
 
 //Wrapper function for changes or optimization
 func activationFunction(num float64) float64 {
-	return math.Tanh(num)
+	return 1.0 / (1.0 + math.Exp(-1.0*num))
 }
 
 //Derivative of the activation function used in backpropagation
 //	Derivative of tanh(x) = 1 - tanh(x)*tanh(x)
 //	We assume the input is tanh(num)
 func activationDerivative(output float64) float64 {
-	return 1.0 - output*output
+	return output * (1 - output)
 }
 
 //****** Data functions ******//
@@ -304,11 +311,25 @@ func shuffleIndices(indices []int) []int {
 	return indices
 }
 
-//prepData splits the training data into 80% for training and 20% for testing
+//prepData randomizes and splits the iris data into 80% for training and 20% for testing.
 func prepData(data [][]float64) (trainData, testData [][]float64) {
 	trainSize := int(float64(len(data)) * 0.8)
-	trainData = data[:trainSize]
-	testData = data[trainSize:]
+	testSize := len(data) - trainSize
+	trainData = make([][]float64, trainSize)
+	testData = make([][]float64, testSize)
+
+	randomIndices := initIndices(len(data))
+	randomIndices = shuffleIndices(randomIndices)
+
+	//Randomly index the data to split into training and testing data
+	for i := 0; i < trainSize; i++ {
+		trainData[i] = data[randomIndices[i]]
+	}
+
+	for i := 0; i < testSize; i++ {
+		testData[i] = data[randomIndices[i+trainSize]]
+	}
+
 	return trainData, testData
 }
 
