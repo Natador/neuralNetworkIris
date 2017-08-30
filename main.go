@@ -43,10 +43,10 @@ func main() {
 	var myNetwork Network
 	myNetwork.initNetwork(4, 7, 3)
 
-	learningRate := 0.01
+	learningRate := 0.05
 	momentum := 0.05
 	maxEpochs := 10000
-	maxError := 0.01
+	maxError := 0.005
 	epochsRun := myNetwork.Train(trainData, maxEpochs, maxError, learningRate, momentum)
 	trainAccuracy := myNetwork.Test(trainData)
 	testAccuracy := myNetwork.Test(testData)
