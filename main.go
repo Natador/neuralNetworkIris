@@ -3,10 +3,18 @@
 
 package main
 
-import "fmt"
-import "math"
-import "math/rand"
-import "time"
+import (
+	"bufio"
+	"encoding/csv"
+	"fmt"
+	"io"
+	"log"
+	"math"
+	"math/rand"
+	"os"
+	"strconv"
+	"time"
+)
 
 //Neuron struct which acts as a node in the network
 type Neuron struct {
@@ -28,7 +36,7 @@ func main() {
 	rand.Seed(time.Now().Unix())
 
 	//Initialize the hard coded data
-	data := loadData()
+	data := LoadData()
 	trainData, testData := prepData(data)
 
 	//Initialize the network
@@ -357,179 +365,56 @@ func prepData(data [][]float64) (trainData, testData [][]float64) {
 	return trainData, testData
 }
 
-//initData returns a [][]float64 containing the hard coded iris data
-func loadData() [][]float64 {
-	var allData [][]float64
+//LoadData loads and parses the iris data from a csv file in ./data
+func LoadData() [][]float64 {
+	irisCsv, err := os.Open("data/iris_dataset.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// sepal length, width, petal length, width
-	// Iris setosa = 0 0 1
-	// Iris versicolor = 0 1 0
-	// Iris virginica = 1 0 0
+	dataReader := csv.NewReader(bufio.NewReader(irisCsv))
 
-	allData = append(allData, []float64{5.1, 3.5, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.9, 3.0, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.7, 3.2, 1.3, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.6, 3.1, 1.5, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.6, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.4, 3.9, 1.7, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{4.6, 3.4, 1.4, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.4, 1.5, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.4, 2.9, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.9, 3.1, 1.5, 0.1, 0, 0, 1})
+	var data [][]float64
 
-	allData = append(allData, []float64{5.4, 3.7, 1.5, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.8, 3.4, 1.6, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.8, 3.0, 1.4, 0.1, 0, 0, 1})
-	allData = append(allData, []float64{4.3, 3.0, 1.1, 0.1, 0, 0, 1})
-	allData = append(allData, []float64{5.8, 4.0, 1.2, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.7, 4.4, 1.5, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{5.4, 3.9, 1.3, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.5, 1.4, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{5.7, 3.8, 1.7, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.8, 1.5, 0.3, 0, 0, 1})
+	for {
+		line, err := dataReader.Read()
+		//If at the end of the file, break
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
 
-	allData = append(allData, []float64{5.4, 3.4, 1.7, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.7, 1.5, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{4.6, 3.6, 1.0, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.3, 1.7, 0.5, 0, 0, 1})
-	allData = append(allData, []float64{4.8, 3.4, 1.9, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.0, 1.6, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.4, 1.6, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{5.2, 3.5, 1.5, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.2, 3.4, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.7, 3.2, 1.6, 0.2, 0, 0, 1})
+		//Ignore 0th entry of the line, as it contains the line number
 
-	allData = append(allData, []float64{4.8, 3.1, 1.6, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.4, 3.4, 1.5, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{5.2, 4.1, 1.5, 0.1, 0, 0, 1})
-	allData = append(allData, []float64{5.5, 4.2, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.9, 3.1, 1.5, 0.1, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.2, 1.2, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.5, 3.5, 1.3, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.9, 3.1, 1.5, 0.1, 0, 0, 1})
-	allData = append(allData, []float64{4.4, 3.0, 1.3, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.4, 1.5, 0.2, 0, 0, 1})
+		//Convert next 4 entries to float64 and store in temporary array
+		tempData := make([]float64, 7)
+		for i := 1; i < 5; i++ {
+			var strErr error
+			tempData[i-1], strErr = strconv.ParseFloat(line[i], 64)
+			if strErr != nil {
+				log.Fatal(strErr)
+			}
+		}
 
-	allData = append(allData, []float64{5.0, 3.5, 1.3, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{4.5, 2.3, 1.3, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{4.4, 3.2, 1.3, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.5, 1.6, 0.6, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.8, 1.9, 0.4, 0, 0, 1})
-	allData = append(allData, []float64{4.8, 3.0, 1.4, 0.3, 0, 0, 1})
-	allData = append(allData, []float64{5.1, 3.8, 1.6, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{4.6, 3.2, 1.4, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.3, 3.7, 1.5, 0.2, 0, 0, 1})
-	allData = append(allData, []float64{5.0, 3.3, 1.4, 0.2, 0, 0, 1})
-
-	allData = append(allData, []float64{7.0, 3.2, 4.7, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{6.4, 3.2, 4.5, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{6.9, 3.1, 4.9, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{5.5, 2.3, 4.0, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.5, 2.8, 4.6, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{5.7, 2.8, 4.5, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.3, 3.3, 4.7, 1.6, 0, 1, 0})
-	allData = append(allData, []float64{4.9, 2.4, 3.3, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{6.6, 2.9, 4.6, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{5.2, 2.7, 3.9, 1.4, 0, 1, 0})
-
-	allData = append(allData, []float64{5.0, 2.0, 3.5, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{5.9, 3.0, 4.2, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{6.0, 2.2, 4.0, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{6.1, 2.9, 4.7, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{5.6, 2.9, 3.6, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.7, 3.1, 4.4, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{5.6, 3.0, 4.5, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{5.8, 2.7, 4.1, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{6.2, 2.2, 4.5, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{5.6, 2.5, 3.9, 1.1, 0, 1, 0})
-
-	allData = append(allData, []float64{5.9, 3.2, 4.8, 1.8, 0, 1, 0})
-	allData = append(allData, []float64{6.1, 2.8, 4.0, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.3, 2.5, 4.9, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{6.1, 2.8, 4.7, 1.2, 0, 1, 0})
-	allData = append(allData, []float64{6.4, 2.9, 4.3, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.6, 3.0, 4.4, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{6.8, 2.8, 4.8, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{6.7, 3.0, 5.0, 1.7, 0, 1, 0})
-	allData = append(allData, []float64{6.0, 2.9, 4.5, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{5.7, 2.6, 3.5, 1.0, 0, 1, 0})
-
-	allData = append(allData, []float64{5.5, 2.4, 3.8, 1.1, 0, 1, 0})
-	allData = append(allData, []float64{5.5, 2.4, 3.7, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{5.8, 2.7, 3.9, 1.2, 0, 1, 0})
-	allData = append(allData, []float64{6.0, 2.7, 5.1, 1.6, 0, 1, 0})
-	allData = append(allData, []float64{5.4, 3.0, 4.5, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{6.0, 3.4, 4.5, 1.6, 0, 1, 0})
-	allData = append(allData, []float64{6.7, 3.1, 4.7, 1.5, 0, 1, 0})
-	allData = append(allData, []float64{6.3, 2.3, 4.4, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{5.6, 3.0, 4.1, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{5.5, 2.5, 4.0, 1.3, 0, 1, 0})
-
-	allData = append(allData, []float64{5.5, 2.6, 4.4, 1.2, 0, 1, 0})
-	allData = append(allData, []float64{6.1, 3.0, 4.6, 1.4, 0, 1, 0})
-	allData = append(allData, []float64{5.8, 2.6, 4.0, 1.2, 0, 1, 0})
-	allData = append(allData, []float64{5.0, 2.3, 3.3, 1.0, 0, 1, 0})
-	allData = append(allData, []float64{5.6, 2.7, 4.2, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{5.7, 3.0, 4.2, 1.2, 0, 1, 0})
-	allData = append(allData, []float64{5.7, 2.9, 4.2, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{6.2, 2.9, 4.3, 1.3, 0, 1, 0})
-	allData = append(allData, []float64{5.1, 2.5, 3.0, 1.1, 0, 1, 0})
-	allData = append(allData, []float64{5.7, 2.8, 4.1, 1.3, 0, 1, 0})
-
-	allData = append(allData, []float64{6.3, 3.3, 6.0, 2.5, 1, 0, 0})
-	allData = append(allData, []float64{5.8, 2.7, 5.1, 1.9, 1, 0, 0})
-	allData = append(allData, []float64{7.1, 3.0, 5.9, 2.1, 1, 0, 0})
-	allData = append(allData, []float64{6.3, 2.9, 5.6, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.5, 3.0, 5.8, 2.2, 1, 0, 0})
-	allData = append(allData, []float64{7.6, 3.0, 6.6, 2.1, 1, 0, 0})
-	allData = append(allData, []float64{4.9, 2.5, 4.5, 1.7, 1, 0, 0})
-	allData = append(allData, []float64{7.3, 2.9, 6.3, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.7, 2.5, 5.8, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{7.2, 3.6, 6.1, 2.5, 1, 0, 0})
-
-	allData = append(allData, []float64{6.5, 3.2, 5.1, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{6.4, 2.7, 5.3, 1.9, 1, 0, 0})
-	allData = append(allData, []float64{6.8, 3.0, 5.5, 2.1, 1, 0, 0})
-	allData = append(allData, []float64{5.7, 2.5, 5.0, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{5.8, 2.8, 5.1, 2.4, 1, 0, 0})
-	allData = append(allData, []float64{6.4, 3.2, 5.3, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{6.5, 3.0, 5.5, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{7.7, 3.8, 6.7, 2.2, 1, 0, 0})
-	allData = append(allData, []float64{7.7, 2.6, 6.9, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{6.0, 2.2, 5.0, 1.5, 1, 0, 0})
-
-	allData = append(allData, []float64{6.9, 3.2, 5.7, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{5.6, 2.8, 4.9, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{7.7, 2.8, 6.7, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{6.3, 2.7, 4.9, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.7, 3.3, 5.7, 2.1, 1, 0, 0})
-	allData = append(allData, []float64{7.2, 3.2, 6.0, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.2, 2.8, 4.8, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.1, 3.0, 4.9, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.4, 2.8, 5.6, 2.1, 1, 0, 0})
-	allData = append(allData, []float64{7.2, 3.0, 5.8, 1.6, 1, 0, 0})
-
-	allData = append(allData, []float64{7.4, 2.8, 6.1, 1.9, 1, 0, 0})
-	allData = append(allData, []float64{7.9, 3.8, 6.4, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{6.4, 2.8, 5.6, 2.2, 1, 0, 0})
-	allData = append(allData, []float64{6.3, 2.8, 5.1, 1.5, 1, 0, 0})
-	allData = append(allData, []float64{6.1, 2.6, 5.6, 1.4, 1, 0, 0})
-	allData = append(allData, []float64{7.7, 3.0, 6.1, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{6.3, 3.4, 5.6, 2.4, 1, 0, 0})
-	allData = append(allData, []float64{6.4, 3.1, 5.5, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.0, 3.0, 4.8, 1.8, 1, 0, 0})
-	allData = append(allData, []float64{6.9, 3.1, 5.4, 2.1, 1, 0, 0})
-
-	allData = append(allData, []float64{6.7, 3.1, 5.6, 2.4, 1, 0, 0})
-	allData = append(allData, []float64{6.9, 3.1, 5.1, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{5.8, 2.7, 5.1, 1.9, 1, 0, 0})
-	allData = append(allData, []float64{6.8, 3.2, 5.9, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{6.7, 3.3, 5.7, 2.5, 1, 0, 0})
-	allData = append(allData, []float64{6.7, 3.0, 5.2, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{6.3, 2.5, 5.0, 1.9, 1, 0, 0})
-	allData = append(allData, []float64{6.5, 3.0, 5.2, 2.0, 1, 0, 0})
-	allData = append(allData, []float64{6.2, 3.4, 5.4, 2.3, 1, 0, 0})
-	allData = append(allData, []float64{5.9, 3.0, 5.1, 1.8, 1, 0, 0})
-
-	return allData
+		//Switch the strings labeling the target data to an array of one-hot-state float64's
+		switch line[5] {
+		case "setosa":
+			tempData[4] = 1.0
+			tempData[5] = 0.0
+			tempData[6] = 0.0
+		case "versicolor":
+			tempData[4] = 0.0
+			tempData[5] = 1.0
+			tempData[6] = 0.0
+		case "virginica":
+			tempData[4] = 0.0
+			tempData[5] = 0.0
+			tempData[6] = 1.0
+		default:
+			fmt.Println("I don't know about", line[5])
+		}
+		data = append(data, tempData)
+	}
+	return data
 }
