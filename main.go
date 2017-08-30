@@ -38,7 +38,7 @@ func main() {
 	learningRate := 0.01
 	momentum := 0.05
 	maxEpochs := 10000
-	maxError := 0.005
+	maxError := 0.01
 	epochsRun := myNetwork.Train(trainData, maxEpochs, maxError, learningRate, momentum)
 	trainAccuracy := myNetwork.Test(trainData)
 	testAccuracy := myNetwork.Test(testData)
