@@ -37,10 +37,12 @@ func main() {
 
 	learningRate := 0.01
 	momentum := 0.05
-	maxEpochs := 2000
-	myNetwork.Train(trainData, maxEpochs, learningRate, momentum)
+	maxEpochs := 10000
+	maxError := 0.005
+	epochsRun := myNetwork.Train(trainData, maxEpochs, maxError, learningRate, momentum)
 	trainAccuracy := myNetwork.Test(trainData)
 	testAccuracy := myNetwork.Test(testData)
+	fmt.Println("Total epochs run:", epochsRun)
 	fmt.Printf("\nTraining accuracy: %.2f%%\n", trainAccuracy*100.0)
 	fmt.Printf("Testing accuracy: %.2f%%\n\n", testAccuracy*100.0)
 
@@ -108,16 +110,17 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 }
 
 //train trains the network using the input data
-func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momentum float64) {
+func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnRate, momentum float64) int {
 	//Indices for randomly looping through the training data
 	indices := initIndices(len(trainData))
 
 	//Main training loop
-	for epoch := 0; epoch < maxEpochs; epoch++ {
-		//	globalError := net.calculateGlobalError(data)
-		//	if globalError > 0.005 {
-		//		break
-		//	}
+	var epoch int
+	for epoch = 0; epoch < maxEpochs; epoch++ {
+		globalError := net.calculateGlobalError(trainData)
+		if globalError < maxError {
+			break
+		}
 
 		//Shuffle the array of indices
 		shuffleIndices(indices)
@@ -138,6 +141,7 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, learnRate, momen
 			net.backProp(targetData, learnRate, momentum)
 		}
 	}
+	return epoch
 }
 
 //Test compares the output from the neural network to the target output in the test data
@@ -284,6 +288,24 @@ func activationFunction(num float64) float64 {
 //	We assume the input is tanh(num)
 func activationDerivative(output float64) float64 {
 	return output * (1 - output)
+}
+
+//calculateGobalError calculates the mean squared error of the network for the given dataset
+func (net *Network) calculateGlobalError(data [][]float64) float64 {
+	var errSum float64 = 0
+
+	for i := range data {
+		trainData := data[i][:4] // Change to accomodate different data-length
+		targetData := data[i][4:]
+		net.feedForward(trainData)
+
+		for j := range net.outputLayer {
+			diff := targetData[j] - net.outputLayer[j].outgoVal
+			errSum += diff * diff
+		}
+	}
+
+	return errSum / float64((len(net.outputLayer) * len(data)))
 }
 
 //****** Data functions ******//
