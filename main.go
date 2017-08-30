@@ -13,7 +13,6 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
-	"time"
 )
 
 //Neuron struct which acts as a node in the network
@@ -33,7 +32,7 @@ type Network struct {
 
 func main() {
 	fmt.Println("We're making a neural network!")
-	rand.Seed(time.Now().Unix())
+	rand.Seed(42)
 
 	//Initialize the hard coded data
 	data := LoadData()
