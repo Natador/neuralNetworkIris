@@ -116,7 +116,7 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 	}
 }
 
-//train trains the network using the input data
+//Train trains the network using the input data
 func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnRate, momentum float64) int {
 	//Indices for randomly looping through the training data
 	indices := initIndices(len(trainData))
@@ -153,7 +153,7 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnR
 
 //Test compares the output from the neural network to the target output in the test data
 func (net *Network) Test(data [][]float64) float64 {
-	var numCorrect int = 0
+	var numCorrect int
 
 	//Loop through the dataset
 	for _, datum := range data {
@@ -178,8 +178,8 @@ func (net *Network) isCorrect(targetData []float64) bool {
 		return false
 	}
 
-	var maxVal float64 = net.outputLayer[0].outgoVal
-	var maxIndex int = 0
+	var maxVal = net.outputLayer[0].outgoVal
+	var maxIndex int
 	for i := range net.outputLayer {
 		//fmt.Println(net.outputLayer[i].outgoVal)
 		if net.outputLayer[i].outgoVal > maxVal {
@@ -190,9 +190,8 @@ func (net *Network) isCorrect(targetData []float64) bool {
 
 	if targetData[maxIndex] == 1.0 {
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 //feedForward computes the output for each neuron in each layer
@@ -210,7 +209,7 @@ func (net *Network) feedForward(inputs []float64) {
 
 		//Compute the weighted sum of input values (excludes bias neuron)
 		for i := 0; i < len(net.hiddenLayer)-1; i++ {
-			var sum float64 = 0
+			var sum float64
 			for j := range net.inputLayer {
 				//Weights accessed by i becuase i determines which connection is made to the next layer
 				//	Includes the weighted sum of the bias neuron's output
@@ -226,7 +225,7 @@ func (net *Network) feedForward(inputs []float64) {
 		//Compute the weighted sum of hidden layer outputs and apply activation function.
 		//	No bias neurons in the output layer, so we can loop directly through it
 		for i := range net.outputLayer {
-			var sum float64 = 0
+			var sum float64
 			for j := range net.hiddenLayer {
 				sum += net.hiddenLayer[j].outgoVal * net.hiddenLayer[j].outgoWeights[i]
 			}
@@ -263,7 +262,7 @@ func (net *Network) backProp(targetData []float64, learnRate, momentum float64) 
 
 	//Compute the error signal for each neuron in the hidden layer
 	for j := range net.hiddenLayer {
-		var weightSum float64 = 0.0
+		var weightSum float64
 		for i := range net.outputLayer {
 			weightSum += net.hiddenLayer[j].outgoWeights[i] * outputErrorSignal[i]
 		}
@@ -299,7 +298,7 @@ func activationDerivative(output float64) float64 {
 
 //calculateGobalError calculates the mean squared error of the network for the given dataset
 func (net *Network) calculateGlobalError(data [][]float64) float64 {
-	var errSum float64 = 0
+	var errSum float64
 
 	for i := range data {
 		trainData := data[i][:4] // Change to accomodate different data-length
