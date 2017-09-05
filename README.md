@@ -1,5 +1,5 @@
 # neuralNetworkIris
-A neural network which classifies the famous [iris dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set) and uses backpropagation to train the network.
+A neural network which classifies the famous [iris dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set) and uses backpropagation to train the network. The purpose of this project was to learn about implementing a neural network.
 
 ## Knowledge Resources
 
@@ -9,4 +9,4 @@ Links to resources which were helpful for the construction of the network. Addit
 
 - [Neural Net in C++ Tutorial.](https://vimeo.com/19569529) Helpful general tutorial on the construction of neural networks. The structure of this project draws heavily from the one presented in the video.
 
-- [Back Propagation Tutorial](http://www.cse.unsw.edu.au/~cs9417ml/MLP2/) Good tutorial for an implementation of back propagation which contains pseudocode to implement the algorithm.
+- [Back Propagation Tutorial](http://www.cse.unsw.edu.au/~cs9417ml/MLP2/) Decent tutorial describing the implementation of back propagation which contains pseudocode.
