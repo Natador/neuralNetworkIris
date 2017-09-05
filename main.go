@@ -140,11 +140,8 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnR
 
 			//Compute the output by feeding-forward the input data
 			net.feedForward(inputData)
-			//fmt.Println()
-			//for j := range net.outputLayer {
-			//fmt.Println(net.outputLayer[j].outgoVal)
-			//}
 
+			//Adjust the weights based on the output
 			net.backProp(targetData, learnRate, momentum)
 		}
 	}
