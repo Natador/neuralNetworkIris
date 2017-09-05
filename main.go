@@ -52,10 +52,6 @@ func main() {
 	fmt.Println("Total epochs run:", epochsRun)
 	fmt.Printf("\nTraining accuracy: %.2f%%\n", trainAccuracy*100.0)
 	fmt.Printf("Testing accuracy: %.2f%%\n\n", testAccuracy*100.0)
-
-	//myNetwork.feedForward(data[20][:4])
-	//fmt.Println(myNetwork.outputLayer)
-	//fmt.Println(data[20][4:])
 }
 
 //****** Network functions ******//
@@ -140,11 +136,8 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnR
 
 			//Compute the output by feeding-forward the input data
 			net.feedForward(inputData)
-			//fmt.Println()
-			//for j := range net.outputLayer {
-			//fmt.Println(net.outputLayer[j].outgoVal)
-			//}
 
+			//Adjust the weights based on the output
 			net.backProp(targetData, learnRate, momentum)
 		}
 	}
@@ -157,14 +150,11 @@ func (net *Network) Test(data [][]float64) float64 {
 
 	//Loop through the dataset
 	for _, datum := range data {
-		//Feed the inputs through the network
+		//Feed the inputs through the network #TODO change 4 to const value
 		net.feedForward(datum[:4])
 
 		//Compare the outputs to the actual data
 		if net.isCorrect(datum[4:]) {
-			//fmt.Println("Correct output:")
-			//fmt.Println(datum[4:])
-			//fmt.Println(net.outputLayer)
 			numCorrect++
 		}
 	}
@@ -181,7 +171,6 @@ func (net *Network) isCorrect(targetData []float64) bool {
 	var maxVal = net.outputLayer[0].outgoVal
 	var maxIndex int
 	for i := range net.outputLayer {
-		//fmt.Println(net.outputLayer[i].outgoVal)
 		if net.outputLayer[i].outgoVal > maxVal {
 			maxVal = net.outputLayer[i].outgoVal
 			maxIndex = i
@@ -290,8 +279,8 @@ func activationFunction(num float64) float64 {
 }
 
 //Derivative of the activation function used in backpropagation
-//	Derivative of tanh(x) = 1 - tanh(x)*tanh(x)
-//	We assume the input is tanh(num)
+//	Derivative of sigmoid = sigmoid*(1-sigmoid)
+//	We assume this receives the output of the sigmoid already, so it does not apply it again
 func activationDerivative(output float64) float64 {
 	return output * (1 - output)
 }
