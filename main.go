@@ -154,7 +154,7 @@ func (net *Network) Test(data [][]float64) float64 {
 
 	//Loop through the dataset
 	for _, datum := range data {
-		//Feed the inputs through the network #TODO change 4 to const value
+		//Feed the inputs through the network
 		net.feedForward(datum[:numInputNeuron])
 
 		//Compare the outputs to the actual data
