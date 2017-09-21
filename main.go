@@ -30,6 +30,10 @@ type Network struct {
 	outputLayer []Neuron
 }
 
+const numInputNeuron = 4
+const numHiddenNeuron = 7
+const numOutputNeuron = 3
+
 func main() {
 	fmt.Println("We're making a neural network!")
 	rand.Seed(42)
@@ -40,7 +44,7 @@ func main() {
 
 	//Initialize the network
 	var myNetwork Network
-	myNetwork.initNetwork(4, 7, 3)
+	myNetwork.initNetwork(numInputNeuron, numHiddenNeuron, numOutputNeuron)
 
 	learningRate := 0.05
 	momentum := 0.05
@@ -131,8 +135,8 @@ func (net *Network) Train(trainData [][]float64, maxEpochs int, maxError, learnR
 		//Loop through the data randomly and compute the feedForward output, then print the output
 		for _, i := range indices {
 			//inputData to hold the measurements, targetData to hold the classification
-			inputData := trainData[i][:4]
-			targetData := trainData[i][4:]
+			inputData := trainData[i][:numInputNeuron]
+			targetData := trainData[i][numInputNeuron:]
 
 			//Compute the output by feeding-forward the input data
 			net.feedForward(inputData)
@@ -151,10 +155,10 @@ func (net *Network) Test(data [][]float64) float64 {
 	//Loop through the dataset
 	for _, datum := range data {
 		//Feed the inputs through the network #TODO change 4 to const value
-		net.feedForward(datum[:4])
+		net.feedForward(datum[:numInputNeuron])
 
 		//Compare the outputs to the actual data
-		if net.isCorrect(datum[4:]) {
+		if net.isCorrect(datum[numInputNeuron:]) {
 			numCorrect++
 		}
 	}
@@ -290,8 +294,8 @@ func (net *Network) calculateGlobalError(data [][]float64) float64 {
 	var errSum float64
 
 	for i := range data {
-		trainData := data[i][:4] // Change to accomodate different data-length
-		targetData := data[i][4:]
+		trainData := data[i][:numInputNeuron] // Change to accomodate different data-length
+		targetData := data[i][numInputNeuron:]
 		net.feedForward(trainData)
 
 		for j := range net.outputLayer {
