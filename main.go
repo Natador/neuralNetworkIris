@@ -82,7 +82,7 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		net.inputLayer[i].outgoDeltas = make([]float64, numHidden+1)
 
 		//Set bias neuron's output to 1.0, and all other outputs to zero
-		if i == len(net.inputLayer)-1 {
+		if i == 0 {
 			net.inputLayer[i].outgoVal = 1.0
 		} else {
 			net.inputLayer[i].outgoVal = 0.0
@@ -101,7 +101,7 @@ func (net *Network) initNetwork(numInputs, numHidden, numOutput int) {
 		net.hiddenLayer[i].outgoDeltas = make([]float64, numOutput+1)
 
 		//Set hidden layer's bias neuron output to 1.0. Set all other outputs to zero.
-		if i == len(net.hiddenLayer)-1 {
+		if i == 0 {
 			net.hiddenLayer[i].outgoVal = 1.0
 		} else {
 			net.hiddenLayer[i].outgoVal = 0.0
