@@ -10,3 +10,5 @@ Links to resources which were helpful for the construction of the network. Addit
 - [Neural Net in C++ Tutorial.](https://vimeo.com/19569529) Helpful general tutorial on the construction of neural networks. The structure of this project draws heavily from the one presented in the video.
 
 - [Back Propagation Tutorial](http://www.cse.unsw.edu.au/~cs9417ml/MLP2/) Decent tutorial describing the implementation of back propagation which contains pseudocode.
+
+- [Neural Network Primer](https://pdfs.semanticscholar.org/54a0/468eab33eb4783f5ef36a5d939a3c1b0ec44.pdf). Summarizes the history of neural networks and in section 5 talks about neural networks with backpropagation.
